@@ -1,0 +1,85 @@
+Unsupervised Domain Adaptation using Stanford NLP group Parser
+
+
+INTERFACE FOR DOMAIN ADAPTATION
+===============================
+
+The implementation of the interface to perform domain adaptation is simple. It encapsulates a lexicalized parser and defines methods for preparing seed, self train and test data in addition to methods for training/testing the parser with different data. It uses the following major methods directly from Stanford parser library:
+
+	-makeTreebank (from Treebank class)
+	-trainFromTreebank (From LexicalizedParser class)
+	-apply (From LexicalizedParser class)
+	-testOnTreebank (From EvaluateTreebank class)
+
+The input required is the type of experiment, location of the training data and the size limit imposed on seed or self train data. A mapping of “experiment type” to details can be found in next section.
+
+In every run, the interface does the following:
+
+	-Based on the experiment type, it splits and selects parts of data needed for training, retraining and testing.
+	-Trains the parser with seed data (annotated sentences)
+	-Tests on In domain test data (returns F1)
+	-Tests on out of domain test data (returns F1)
+	-Parses out of domain unlabeled self train data
+	-Adds output of step 6 to seed data
+	-Retrains parser using new seed data
+	-Tests on out of domain test data (returns F1)
+	-Prints results (F1 values obtained in step 4,5 and 9)
+
+For each run, we get 3 F1 values which are  indomain F1, out of domain before domain adaptation and out of domain after domain adaptation.
+
+
+CODE LOCATION
+=============
+The code/ folder comprises of the actual code for creating an interface over Lexicalized parser from Stanford parser library for doing domain adaptation. The exact source file is located at:
+
+code/myParser/src
+
+
+EXECUTABLE JAR LOCATION
+=======================
+
+Please find a readily executable 'jar' file for the interface to run domain adaptation at the root directory of submission.
+
+>myParser.jar
+
+The command to run this jar looks like this:
+
+>java -jar myParser.jar <TYPE OF EXPERIMENT> <PATH TO DATA> <SIZELIMIT>
+
+For example,
+
+>java -jar myParser.jar "exp1" "/home/vidhoonv/spring-2014/nlp/hw3/data/" "1000" 
+
+Here is the experiment type code and the mapping to relevant experiments in the assignment:
+
+Experiment type 						Description
+===============                         ============   
+exp1									seed - WSJ (1000,2000....)
+										in domain test - WSJ sec 23
+										selftrain - 90% brown
+										out of domain test - 10% brown
+
+exp2									seed - WSJ first 10,000
+										in domain test test - WSJ sec 23
+										self train - 1000,2000 ... in 90% brown
+										out of domain test - 10% brown
+
+exp3									seed - 90% brown 1000,2000,3000…
+										in domain test - 10% brown
+										selftrain - WSJ 02-22
+										out of domain test - WSj 23
+
+exp4									seed - first 10,000  of 90% brown
+										in domain  test - 10% brown
+										selftrain - WSJ 02-22 1000,2000,3000....
+										out of domain test -  WSJ 23
+
+
+BATCH SUBMISSION CODE
+======================
+
+Please find my shell scripting code to automatically generate condor job description scripts at:
+
+batch-code/
+
+I have included the scripts used to generating and submitting jobs for running experiment 1 (as a sample).
